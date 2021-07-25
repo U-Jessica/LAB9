@@ -22,10 +22,6 @@ def sum3():
 @app.route('/sum4')
 def sum4():    
     return render_template('sum4.html')
-
-@app.route('/sum5')
-def sum5():    
-    return render_template('sum5.html')
    
 @app.route("/submitJSON1", methods=["POST"])
 def processJSON1(): 
@@ -33,17 +29,26 @@ def processJSON1():
     jsonObj = json.loads(jsonStr) 
     
     response = ""
-    a=int(jsonObj['a'])
-    s=0
-    for i in range (1,a+1):
-        if(i%2==1):
-            if(i%5==0):
-                s=s
-            else:
-                s=s+i
-   
-    response+="<b> The sum of all odds excludin the numbers divisible by 5 is : <b>"+str(s)+"</b><br>"
-     	    
+    l=jsonObj['l'].split(',')
+    k=int(jsonObj['k'])
+    list1=[]
+    list3=[]
+##unique
+    for i in l:
+        if i not in list1:
+            list1.append(i)
+    list2=[0]*len(list1)
+    for i in range (len(list1)):
+        for j in range (len(l)):
+            if list1[i]==l[j]:
+                list2[i]=list2[i]+1
+    for i in range (len(list2)):
+        if (k<list2[i]):
+             list3.append(list1[i])         
+    response+="<b> "+str(list3)+"</b><br>"
+        
+    
+    	    
     return response
 
 @app.route("/submitJSON2", methods=["POST"])
@@ -52,18 +57,20 @@ def processJSON2():
     jsonObj = json.loads(jsonStr) 
     
     response = ""
-    a=int(jsonObj['a'])
-    f=[]
-    for i in range (a):
-        if(i==0):
-            f.append(0)
-        elif (i==1):
-            f.append(1)
-        else:
-            f.append(f[i-1]+f[i-2])
-    k=str(f)[1:-1]
-    response+="<b><b>"+k+"</b><br>"
-     	    
+    l1=jsonObj['l1'].split(',')
+    l2=jsonObj['l2'].split(',')
+    k=l2.reverse()
+    m=min(len(l1),len(l2))
+    p=max(len(l1),len(l2))
+    for i in range (m):
+        response+="<b> "+str(l1[i])+" " +str(l2[i])+"</b><br>"
+    if (len(l1)==p):
+        for i in range (-(p-m),0):
+            response+="<b> "+str(l1[i])+"</b><br>"
+    elif (len(l2)==p):
+        for i in range (-(p-m),0):
+            response+="<b> "+str(l2[i])+"</b><br>"
+    	    
     return response
 
 @app.route("/submitJSON3", methods=["POST"])
@@ -72,15 +79,14 @@ def processJSON3():
     jsonObj = json.loads(jsonStr) 
     
     response = ""
-    ans=""
-    s=0
-    for i in range(5):
-        for j in range(i+1):
-            s=s+1
-            ans=ans+str(s)+" "
-        ans=ans+"<br>"
-    response+="<b><b>"+ans+"</b><br>" 	    
-    return response 
+    l1=jsonObj['l1'].split(',')
+    list1=[]
+    for i in l1:
+        if i not in list1:
+            list1.append(i)
+    response+="<b> "+str(list1)+"</b><br>"
+    	    
+    return response
 
 @app.route("/submitJSON4", methods=["POST"])
 #two lists and for loops
@@ -90,36 +96,23 @@ def processJSON4():
     jsonObj = json.loads(jsonStr) 
     
     response = ""
-    a=jsonObj['a']
-    k=a.lower()
-    list1=[]
-    for a in k:
-        if a not in list1:
-            list1.append(a)
-    list2=[0]*len(list1)
-    for i in range (len(list1)):
-        for j in range(len(k)):
-            if (list1[i]==k[j]):
-                list2[i]=list2[i]+1
-    index=list2.index(max(list2))
-    response+="<b><b>"+list1[index]+"</b><br>" 	    
-    return response 
+    l1=jsonObj['l1'].split(',')
+    l2=jsonObj['l2'].split(',')
+    ans=[]
+    for i in range (len(l1)):
+        l1[i]=l1[i].lower()
+    for i in range (len(l2)):
+        l2[i]=l2[i].lower()
+    for i in l2
+        if i in l1 and i not in ans:
+            ans.append(i)
 
-@app.route("/submitJSON5", methods=["POST"])
-def processJSON5(): 
-    jsonStr = request.get_json()
-    jsonObj = json.loads(jsonStr) 
+    response+="<b> "+str(ans)+"</b><br>"
+    	    
+    return response
     
-    response = ""
-    a=int(jsonObj['a'])
-    s=1
-    for i in range(1,a+2):
-        s=s*i
-    for i in range(a+1,1,-1):
-        s=s//i
-        response+="<b><b>"+str(i-1)+"! ="+str(s)+"</b><br>" 	    
-    return response  
-    
+
+
 if __name__ == "__main__":
     app.run(debug=True)
     
