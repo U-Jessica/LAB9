@@ -103,7 +103,7 @@ def processJSON4():
         l1[i]=l1[i].lower()
     for i in range (len(l2)):
         l2[i]=l2[i].lower()
-    for i in l2
+    for i in l2:
         if i in l1 and i not in ans:
             ans.append(i)
 
