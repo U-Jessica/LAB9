@@ -36,9 +36,11 @@ def ans1(a,b):
         for j in a:
             if j==list2[i]:
                 list3[i]=list3[i]+1
-    for k in range (len(list3)):
-        if list3[k]>2:
-            ans=ans+"<b>Item "+str(list2[k])+" with frequency "+str(list3[k])+"</b><br>"
+    for k in range (b):
+        index=list3.index(max(list3))
+        ans=ans+"<b>Item "+str(list2[index])+" with frequency "+str(list3[index])+"</b><br>"
+        del list3[index]
+        del list2[index]    
     return ans
 
 @app.route("/submitJSON1", methods=["POST"])
