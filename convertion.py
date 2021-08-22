@@ -35,39 +35,53 @@ def sum5():
 def processJSON1(): 
     jsonStr = request.get_json()
     jsonObj = json.loads(jsonStr) 
-    
     response = ""
-
-    l=jsonObj['l'].split(';')
-    for i in range (len(l)):
-        if (l[i]==''):
-            l[i]=tuple()
-            continue
-        l[i]=tuple(map(int,l[i].split(",")))
-    while(() in l):
-        l.remove(())
-    response=str(l)
+    sub_set=jsonObj['sub_set'].split(',')
+    n=int(jsonObj['n'])
+    total=[]
+    def ans (n,values,till):
+        if (len(till)==n):
+            total.append(set(till))
+        elif (len(values)==0):
+            return
+        for i in range (len(values)):
+            ans(n,values[i+1:],till+[values[i]])
+    ans(n,sub_set,[])
+    response=str(total)
     return response
 
-
-def test(lst):
-    result=map(sum,lst)
-    return list(result)
-
-
+def count(name):
+    f = open(name, "r")
+    T = 0
+    for x in f:
+        if x[0] != "T" and x[0] != "t":
+            T=T+1
+    f.close()
+    return T
+def vowels(name):
+    check=['a','e','i','o','u']
+    f = open(name, "r")
+    T = 0
+    for x in f:
+        all_words=x.split(" ")
+        for k in all_words:
+            temp=k
+            temp= temp.lower()
+            temp=set(list(temp))
+            if (len(temp & set(check))==0):
+                T=T+1
+    f.close()
+    return T
 @app.route("/submitJSON2", methods=["POST"])
 def processJSON2(): 
     jsonStr = request.get_json()
     jsonObj = json.loads(jsonStr) 
-    
+    l=jsonObj['l']
     response = ""
-    l=jsonObj['l'].split(';')
-    for i in range (len(l)):
-        if(l[i]==''):
-            l[i]=tuple()
-            continue
-        l[i]=tuple(map(int,l[i].split(",")))
-    response=str(test(l))    	    
+    T=count(l)
+    a=vowels(l)
+    response=response+"Number of lines without T "+str(T) 
+    response=response+"          ;Number of words without vowels "+str(a)  
     return response
 
 
@@ -75,64 +89,88 @@ def processJSON2():
 def processJSON3(): 
     jsonStr = request.get_json()
     jsonObj = json.loads(jsonStr) 
-    
+    l1=jsonObj['l1']   
+    l2=int(jsonObj['l2'])  
+    l3=int(jsonObj['l3'])  
     response = ""
-    l1=jsonObj['l1'].split(';')
-    l2=jsonObj['l2'].split(',')
-    test_dict={}
-    for i in l1:
-        a=i.split(",")
-        test_dict[a[0]]=a[1]
-    keys=list(test_dict.keys())
-    for i in keys:
-        for j in l2:
-            if test_dict[i].find(j) != -1:
-                del test_dict[i]
-                break
-    response=str(test_dict)
-    	    
+    f = open(l1, "r")
+    T = 1
+    for x in f:
+        if (T>=l2 and T<l2+l3):
+            response=response+x+"<br>"
+        T=T+1
+    f.close()	    
     return response
 
-
+import os
 @app.route("/submitJSON4", methods=["POST"])
 def processJSON4(): 
     jsonStr = request.get_json()
     jsonObj = json.loads(jsonStr) 
-    
     response = ""
-    l=list(map(int,jsonObj['l'].split(',')))
-    counts=dict()
-    for i in range(1,(max(l)+1)):
-        counts[i]=0
-        for key in l:
-            if key%i==0:
-                counts[i]=counts[i]+1
-    response=str(counts)    	    
+    f = open("a.txt", "w")
+    f.close()
+    f = open("a.txt", "a")
+    f.write("First line")  
+    f.write("\nsecond line")
+    f.write("\nthird line")  
+    f.close()
+    os.rename('a.txt', 'myfile.txt')
+    f = open("myfile.txt")
+    string_list = f.readlines()
+    string_list[1]="\nsorry!The content of this line has been changed!"
+    f.close()
+    f=open("myfile.txt","w")
+    f.writelines(string_list)
+    f.close()	
+    response="".join(string_list)	    
     return response
+
+import pickle
+def find_frequency(name):
+    f = open(name, "r")
+    dict1={}
+    dict2={}
+    for x in f:
+        all_words=x.split(" ")
+        for k in all_words:
+            if (k in dict1):
+                dict1[k]=dict1[k]+1
+            else:
+                dict1[k]=1
+            temp=list(k)
+            for i in temp:
+                if (i in dict2):
+                    dict2[i]=dict2[i]+1
+                else:
+                    dict2[i]=1
+    f.close()
+    return (dict1,dict2)
 @app.route("/submitJSON5", methods=["POST"])
 def processJSON5(): 
     jsonStr = request.get_json()
-    jsonObj = json.loads(jsonStr) 
-    
-    response = ""
-    f={'music':{'x':5,'y':6,'z':3},'best':{'x':8,'y':3,'z':5}}
-    dod={}
-    ll=[]
-    for v in f.values():
-        for kk in v.keys():
-            dod[kk]=[]
-    for k,v in f.items():
-        for kk,vv in v.items():
-            dod[kk].append(tuple((k,vv)))
-
-    response=str(dod)
-    for k,v in dod.items():
-        temp=[]
-        temp.append(k)
-        for vv in v:
-            temp.append(vv)
-        ll.append(tuple(temp))
-    response=str(tuple(ll))     
+    jsonObj = json.loads(jsonStr)
+    response=""
+    filename=jsonObj['filename']
+    dict1,dict2=find_frequency(filename) 
+    with open('pickle_word', 'wb') as f:
+        pickle.dump(dict1, f)
+    with open('pickle_char', 'wb') as f:
+        pickle.dump(dict2, f)
+    read = open ("pickle_word", "rb")
+    words = pickle.load(read)
+    read.close()
+    new_text=""
+    for i in words:
+        new_text=new_text+(i+" ")*words[i]
+    f=open("new_file.txt","w")
+    f.write(new_text)
+    f.close()
+    dict3,dict4=find_frequency("new_file.txt")
+    if (dict2==dict4):
+        response=response+"Both have same character frequency"
+    else:
+        response=response+"Both don't have same character frequency"    
     return response
     
 if __name__ == "__main__":
