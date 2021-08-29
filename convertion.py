@@ -5,13 +5,61 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
+class Rectangle(object):
+    def __init__(self,length,breadth):
+        self.length=length
+        self.breadth=breadth
+    def Area(self):
+        return self.length*self.breadth
+
+class Time(object):
+    def __init__(self,hours=0,minutes=0):
+        self.minutes=minutes
+        self.hours=hours
+    def Addtime(self,add):
+        self.hours+=add.hours
+        self.minutes+=add.minutes
+        self.hours+=self.minutes//60
+        self.minutes=self.minutes%60
+    def displayTime(self):
+        return ("%d hours and %d minutes"%(self.hours,self.minutes))
+    def displayMinutes(self):
+        return str(self.hours*60+self.minutes)
+
+class Students(object):
+    count=0
+    even_marks=0
+    odd_marks=0
+    even_count=0
+    odd_count=0
+    def __init__(self,name,roll_no,age):
+        self.name=name
+        self.roll_no=roll_no
+        if (roll_no%2==0):
+            Students.even_count+=1
+        else:
+            Students.odd_count+=1
+        self.age=age
+        self.marks=0
+        Students.count+=1
+    def display(self):
+        return ("%s %d %d" %(self.name,self.roll_no,self.age))
+    def setMarks(self,marks):
+        self.marks=marks
+        if (self.roll_no%2==0):
+            Students.even_marks+=marks
+        else:
+            Students.odd_marks+=marks
+    def printCount(self):
+        return ("The total count of students is %d"%(Students.count))
+    def printEavg(self):
+        return ("The average of even roll no students is %d"%(Students.even_marks/Students.even_count))
+    def printOavg(self):
+        return ("The average of odd roll no students is %d"%(Students. odd_marks/Students.odd_count))
+
 @app.route("/")
 def home():
     return render_template("InputOutput.html")
-
-@app.route('/sum1')
-def sum1():    
-    return render_template('sum1.html')
 
 @app.route('/sum2')
 def sum2():    
@@ -25,63 +73,15 @@ def sum3():
 def sum4():    
     return render_template('sum4.html')
 
-@app.route('/sum5')
-def sum5():    
-    return render_template('sum5.html')
-
-
-
-@app.route("/submitJSON1", methods=["POST"])
-def processJSON1(): 
-    jsonStr = request.get_json()
-    jsonObj = json.loads(jsonStr) 
-    response = ""
-    sub_set=jsonObj['sub_set'].split(',')
-    n=int(jsonObj['n'])
-    total=[]
-    def ans (n,values,till):
-        if (len(till)==n):
-            total.append(set(till))
-        elif (len(values)==0):
-            return
-        for i in range (len(values)):
-            ans(n,values[i+1:],till+[values[i]])
-    ans(n,sub_set,[])
-    response=str(total)
-    return response
-
-def count(name):
-    f = open(name, "r")
-    T = 0
-    for x in f:
-        if x[0] != "T" and x[0] != "t":
-            T=T+1
-    f.close()
-    return T
-def vowels(name):
-    check=['a','e','i','o','u']
-    f = open(name, "r")
-    T = 0
-    for x in f:
-        all_words=x.split(" ")
-        for k in all_words:
-            temp=k
-            temp= temp.lower()
-            temp=set(list(temp))
-            if (len(temp & set(check))==0):
-                T=T+1
-    f.close()
-    return T
 @app.route("/submitJSON2", methods=["POST"])
 def processJSON2(): 
     jsonStr = request.get_json()
     jsonObj = json.loads(jsonStr) 
-    l=jsonObj['l']
-    response = ""
-    T=count(l)
-    a=vowels(l)
-    response=response+"Number of lines without T "+str(T) 
-    response=response+"          ;Number of words without vowels "+str(a)  
+    l=int(jsonObj['l'])
+    b=int(jsonObj['b'])
+    response = "The area of the rectangle is "
+    rectangle=Rectangle(l,b)
+    response=response+str(rectangle.Area())+" units"
     return response
 
 
@@ -89,88 +89,76 @@ def processJSON2():
 def processJSON3(): 
     jsonStr = request.get_json()
     jsonObj = json.loads(jsonStr) 
-    l1=jsonObj['l1']   
-    l2=int(jsonObj['l2'])  
-    l3=int(jsonObj['l3'])  
-    response = ""
-    f = open(l1, "r")
-    T = 1
-    for x in f:
-        if (T>=l2 and T<l2+l3):
-            response=response+x+"<br>"
-        T=T+1
-    f.close()	    
+    if(jsonObj['l1']!=""):
+        l1=list(map(int,jsonObj['l1'].split(",")))
+    else:
+         l1=[]
+    if(jsonObj['l2']!=""):
+        l2=list(map(int,jsonObj['l2'].split(",")))
+    else:
+         l2=[]  
+    if(jsonObj['l3']!=""):
+        l3=list(map(int,jsonObj['l3'].split(",")))
+    else:
+         l3=[]
+    while(len(l1)<2):
+        l1.append(0)  
+    while(len(l2)<2):
+        l2.append(0) 
+    while(len(l3)<2):
+        l3.append(0)
+    obj1=Time(l1[0],l1[1])
+    obj2=Time(l2[0],l2[1])
+    obj3=Time(l3[0],l3[1])
+    response = "Addition of hours and minutes 1 and hours and minutes 2 is "
+    obj1.Addtime(obj2)
+    response=response+obj1.displayTime()+"<br>"  
+    response=response+"Time of 1 is "+obj1.displayTime()+"<br>" 
+    response=response+"Time of 2 is "+obj2.displayTime()+"<br>" 
+    response=response+"Time of 3 is "+obj3.displayTime()+"<br>"
+    response=response+"Time of 1 in minutes is "+obj1.displayMinutes()+"<br>"
+    response=response+"Time of 2 in minutes is "+obj2.displayMinutes()+"<br>"
+    response=response+"Time of 3 in minutes is "+obj3.displayMinutes()+"<br>"   
     return response
 
-import os
 @app.route("/submitJSON4", methods=["POST"])
 def processJSON4(): 
     jsonStr = request.get_json()
     jsonObj = json.loads(jsonStr) 
-    response = ""
-    f = open("a.txt", "w")
-    f.close()
-    f = open("a.txt", "a")
-    f.write("First line")  
-    f.write("\nsecond line")
-    f.write("\nthird line")  
-    f.close()
-    os.rename('a.txt', 'myfile.txt')
-    f = open("myfile.txt")
-    string_list = f.readlines()
-    string_list[1]="\nsorry!The content of this line has been changed!"
-    f.close()
-    f=open("myfile.txt","w")
-    f.writelines(string_list)
-    f.close()	
-    response="".join(string_list)	    
-    return response
-
-import pickle
-def find_frequency(name):
-    f = open(name, "r")
-    dict1={}
-    dict2={}
-    for x in f:
-        all_words=x.split(" ")
-        for k in all_words:
-            if (k in dict1):
-                dict1[k]=dict1[k]+1
-            else:
-                dict1[k]=1
-            temp=list(k)
-            for i in temp:
-                if (i in dict2):
-                    dict2[i]=dict2[i]+1
-                else:
-                    dict2[i]=1
-    f.close()
-    return (dict1,dict2)
-@app.route("/submitJSON5", methods=["POST"])
-def processJSON5(): 
-    jsonStr = request.get_json()
-    jsonObj = json.loads(jsonStr)
+    l1=list(jsonObj['l1'].split(","))
+    l2=list(jsonObj['l2'].split(","))
+    l3=list(jsonObj['l3'].split(","))
+    l4=list(jsonObj['l4'].split(","))
+    l5=list(jsonObj['l5'].split(","))
+    l6=list(jsonObj['l6'].split(","))
+    l1=Students(l1[0],int(l1[1]),int(l1[2]))
+    l2=Students(l2[0],int(l2[1]),int(l2[2]))
+    l3=Students(l3[0],int(l3[1]),int(l3[2]))
+    l4=Students(l4[0],int(l4[1]),int(l4[2]))
+    l5=Students(l5[0],int(l5[1]),int(l5[2]))
+    l6=Students(l6[0],int(l6[1]),int(l6[2]))
+    if(jsonObj['m1']!=""):
+        l1.setMarks(int(jsonObj['m1']))
+    if(jsonObj['m2']!=""):
+        l2.setMarks(int(jsonObj['m2']))
+    if(jsonObj['m3']!=""):
+        l3.setMarks(int(jsonObj['m3']))
+    if(jsonObj['m4']!=""):
+        l4.setMarks(int(jsonObj['m4']))
+    if(jsonObj['m5']!=""):
+        l5.setMarks(int(jsonObj['m5']))
+    if(jsonObj['m6']!=""):
+        l6.setMarks(int(jsonObj['m6']))
     response=""
-    filename=jsonObj['filename']
-    dict1,dict2=find_frequency(filename) 
-    with open('pickle_word', 'wb') as f:
-        pickle.dump(dict1, f)
-    with open('pickle_char', 'wb') as f:
-        pickle.dump(dict2, f)
-    read = open ("pickle_word", "rb")
-    words = pickle.load(read)
-    read.close()
-    new_text=""
-    for i in words:
-        new_text=new_text+(i+" ")*words[i]
-    f=open("new_file.txt","w")
-    f.write(new_text)
-    f.close()
-    dict3,dict4=find_frequency("new_file.txt")
-    if (dict2==dict4):
-        response=response+"Both have same character frequency"
-    else:
-        response=response+"Both don't have same character frequency"    
+    response=response+l1.display()+"<br>"
+    response=response+l2.display()+"<br>"
+    response=response+l3.display()+"<br>"
+    response=response+l4.display()+"<br>"
+    response=response+l5.display()+"<br>"
+    response=response+l6.display()+"<br>"
+    response=response+l1.printCount()+"<br>"
+    response=response+l1.printEavg()+"<br>"
+    response=response+l1.printOavg()+"<br>"	    
     return response
     
 if __name__ == "__main__":
